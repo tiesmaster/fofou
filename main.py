@@ -29,7 +29,7 @@ SKINS = ["default"]
 
 BANNED_IPS = { }
 
-RE_VALID_URL = re.compile(r'^[A-Za-z0-9]+([_\-]?[A-Za-z0-9]+)*$')
+RE_VALID_URL = re.compile(r'^[a-z0-9]+([_\-]?[a-z0-9]+)*$')
 
 def to_unicode(val):
   if isinstance(val, unicode): 
