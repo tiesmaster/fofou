@@ -1,6 +1,6 @@
 # This code is in Public Domain. Take all the code you want, we'll just write more.
 
-import Cookie, StringIO, os, re, string, sha, time, random, cgi, urllib, datetime, pickle, logging
+import StringIO, os, re, string, sha, time, random, cgi, urllib, datetime, pickle, logging
 import wsgiref.handlers
 
 from google.appengine.api import users
@@ -18,12 +18,13 @@ DEBUG = True
 
 HTTP_NOT_ACCEPTABLE = 406
 HTTP_NOT_FOUND = 404
+HTTP_DATE_FMT = "%a, %d %b %Y %H:%M:%S GMT"
 
 # Cookie code based on http://code.google.com/p/appengine-utitlies/source/browse/trunk/utilities/session.py
 FOFOU_COOKIE = "fofou-uid"
 
 # Valid for 120 days
-COOKIE_EXPIRE_TIME = 60*60*24*120
+COOKIE_EXPIRE_TIME = 120
 
 SKINS = ["default"]
 
@@ -52,7 +53,8 @@ class FofouBase(webapp.RequestHandler):
     self.settings = FofouSettings.load()
   
   def template_out(self, template_path, template_values):
-    self.response.headers["Set-Cookie"] = str(self.cookie).split(": ", 1)[1]
+    # just a dummy call to to the function
+    self.get_cooke()
     self.response.headers['Content-Type'] = 'text/html'
     self.response.out.write( template.render(template_path, template_values) )
 
@@ -61,15 +63,14 @@ class FofouBase(webapp.RequestHandler):
     if self._cookie:
       return self._cookie
 
-    cookies = Cookie.SimpleCookie()
-    cookies.load( os.environ.get('HTTP_COOKIE', '' ) )
+    try:
+      fid = self.request.cookies[FOFOU_COOKIE]
+    except KeyError:
+      fid = sha.new(repr(time.time())).hexdigest()
+      expires = datetime.datetime.now() + datetime.timedelta(COOKIE_EXPIRE_TIME)
+      self.response.headers['Set-Cookie'] = '%s=%s; expires=%s; path=/' % (FOFOU_COOKIE, fid, expires.strftime(HTTP_DATE_FMT))
 
-    if (FOFOU_COOKIE not in cookies) or len(cookies[FOFOU_COOKIE].value) != 40:
-      cookies[FOFOU_COOKIE] = sha.new( repr( time.time() ) ).hexdigest()
-      cookies[FOFOU_COOKIE]['path'] = '/'
-      cookies[FOFOU_COOKIE]['expires'] = COOKIE_EXPIRE_TIME
-
-    self._cookie = cookies[FOFOU_COOKIE]
+    self._cookie = fid
     return self._cookie
   
   cookie = property(get_cooke)
@@ -404,7 +405,7 @@ class PostForm(FofouBase):
     if user:
       fuser = FofouUser.gql("WHERE user = :1", user).get()
     else: 
-      fuser = FofouUser.gql("WHERE cookie = :1", self.cookie.value ).get()
+      fuser = FofouUser.gql("WHERE cookie = :1", self.cookie ).get()
 
     tvals = {
       'user': user,
@@ -496,7 +497,7 @@ class PostForm(FofouBase):
     if user:
       fuser = FofouUser.gql("WHERE user = :1", user).get()
     else: 
-      fuser = FofouUser.gql("WHERE cookie = :1", self.cookie.value).get()
+      fuser = FofouUser.gql("WHERE cookie = :1", self.cookie).get()
 
     if not fuser:
       fuser = FofouUser(
@@ -505,7 +506,7 @@ class PostForm(FofouBase):
         email = email or 'anonymous@example.com', 
         name = name or 'Anonymous', 
         homepage = homepage,
-        cookie = self.cookie.value )
+        cookie = self.cookie )
     else:
       fuser.remember_me = remember
       fuser.email = email or 'anonymous@example.com'
