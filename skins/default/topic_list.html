@@ -14,6 +14,17 @@
       	    <span class="comments-count">{{ topic.ncomments }} comment{{ topic.ncomments|pluralize }}</span>
       	    {% if isadmin %}
         	    <div class='buttons'>
+								<form id="move" action="{{ forum.root }}move?id={{ topic.id }}" method="post">
+									Move to
+									<select name="forumto">
+										{% for f in forum_urls %}
+										{% ifnotequal f forum.url %}
+										<option value="{{f}}">{{f}}</option>
+										{% endifnotequal %}
+										{% endfor %}
+									</select>
+									<button type="submit">Move</button>
+								</form>
         	      {% if topic.is_locked %}
         	        <a href="{{ forum.root }}lock?id={{ topic.id }}" class="button">Unlock</a>
         	      {% else %}

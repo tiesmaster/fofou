@@ -329,6 +329,7 @@ class TopicList(FofouBase):
       'siteurl': self.request.url,
       'isadmin': is_admin,
       'forum' : forum,
+      'forum_urls': [f.url for f in Forum.all()],
       'topics': topics,
       'offset': offset,
       'login_url': users.create_login_url(forum.root()),
@@ -384,6 +385,35 @@ class TopicForm(FofouBase):
       'logout_url' : users.create_logout_url(self.request.url)
     }
     self.template_out("skins/default/topic.html", tvals)
+
+# responds to /<forumurl>/move?id=<id>
+class MoveTopic(webapp.RequestHandler):
+
+  def post(self):
+    forum = Forum.from_url(self.request.path_info)
+    is_admin = users.is_current_user_admin()
+
+    # Only admins can move topics
+    if not forum or not is_admin:
+      return self.redirect("/")
+
+    try:
+      forumto = Forum.from_url(self.request.get('forumto'))
+      topic = db.get( db.Key.from_path( 'Topic', int(self.request.get('id')) ) )
+    except ValueError:
+      return self.redirect(forum.root())
+
+    if topic and forumto:
+      topic.forum = forumto
+      topic.put()
+      forum.num_topics -= 1
+      forum.num_posts -= topic.ncomments
+      forum.put()
+      forumto.num_topics += 1
+      forumto.num_posts += topic.ncomments
+      forumto.put()
+
+    return self.redirect(forum.root())
 
 # Responds to /<forumurl>/post[?id=<topic_id>]
 class PostForm(FofouBase):
@@ -548,5 +578,6 @@ if __name__ == "__main__":
     ('/[^/]+/postundel', PostDelUndel),
     ('/[^/]+/lock', LockTopic),
     ('/[^/]+/post', PostForm),
+    ('/[^/]+/move', MoveTopic),
     ('/[^/]+/topic', TopicForm),
     ('/[^/]+/?', TopicList)], debug=DEBUG))
