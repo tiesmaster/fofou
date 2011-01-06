@@ -220,9 +220,9 @@ class PostDelUndel(webapp.RequestHandler):
 
     post  = db.get( db.Key.from_path( 'Post', int(self.request.query_string) ) )
     topic = post.topic
-    first = Post.gql("WHERE forum=:1 AND topic=:2 ORDER BY created_on", forum, topic).get()
+    first = Post.gql("WHERE topic=:1 ORDER BY created_on", topic).get()
 
-    if not post or post.forum.key() != forum.key():
+    if not post or topic.forum.key() != forum.key():
       return self.redirect(forum.root())
 
     if self.request.path.endswith("/postdel") and not post.is_deleted:
@@ -369,9 +369,9 @@ class TopicForm(FofouBase):
     
     # TODO: Make Pagination
     if is_admin:
-      posts = Post.gql("WHERE forum = :1 AND topic = :2 ORDER BY created_on", forum, topic)
+      posts = Post.gql("WHERE topic = :1 ORDER BY created_on", topic)
     else:
-      posts = Post.gql("WHERE forum = :1 AND topic = :2 AND is_deleted = False ORDER BY created_on", forum, topic)
+      posts = Post.gql("WHERE topic = :1 AND is_deleted = False ORDER BY created_on", topic)
     
     tvals = {
       'user': user,
@@ -525,7 +525,6 @@ class PostForm(FofouBase):
     
     post = Post(
       topic = topic, 
-      forum = forum, 
       user = fuser, 
       user_ip = os.environ['REMOTE_ADDR'], 
       message = message, 

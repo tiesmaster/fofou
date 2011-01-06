@@ -133,7 +133,6 @@ class Post(db.Model):
     super(Post, self).__init__(*args, **kwargs)
 
   topic = db.Reference(Topic, required=True)
-  forum = db.Reference(Forum, required=True)
   created_on = db.DateTimeProperty(auto_now_add=True)
   message = db.TextProperty(required=True)
   sha1_digest = db.StringProperty(required=True)
