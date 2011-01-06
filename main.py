@@ -1,6 +1,6 @@
 # This code is in Public Domain. Take all the code you want, we'll just write more.
 
-import StringIO, os, re, string, sha, time, random, cgi, urllib, datetime, pickle, logging
+import StringIO, re, string, sha, time, random, cgi, urllib, datetime, pickle, logging
 import wsgiref.handlers
 
 from google.appengine.api import users
@@ -103,8 +103,8 @@ class ManageSettings(FofouBase):
     email_white = self.request.get('email_whitelist', '').strip()
     email_black = self.request.get('email_blacklist', '').strip()
 
-    if os.environ['REMOTE_ADDR'] in banned:
-      banned = banned.replace(os.environ['REMOTE_ADDR'], "")
+    if self.request.remote_addr in banned:
+      banned = banned.replace(self.request.remote_addr, "")
       
     self.settings.email_blacklist = email_black
     self.settings.email_whitelist = email_white
@@ -286,7 +286,7 @@ class ForumList(FofouBase):
     if is_admin:
       return self.redirect("/manageforums")
     
-    if not self.settings.check_ip(os.environ['REMOTE_ADDR']):
+    if not self.settings.check_ip(self.request.remote_addr):
       return self.response.out.write('Your IP address has been banned')
     
     if not self.settings.check_user( user ):
@@ -313,7 +313,7 @@ class TopicList(FofouBase):
     if not forum or (forum.is_disabled and not is_admin):
       return self.redirect("/")
     
-    if not is_admin and not self.settings.check_ip(os.environ['REMOTE_ADDR']):
+    if not is_admin and not self.settings.check_ip(self.request.remote_addr):
       return self.response.out.write('Your IP address has been banned')
 
     if not is_admin and not self.settings.check_user( user ):
@@ -348,7 +348,7 @@ class TopicForm(FofouBase):
     if not forum or (forum.is_disabled and not is_admin):
       return self.redirect("/")
     
-    if not is_admin and not self.settings.check_ip(os.environ['REMOTE_ADDR']):
+    if not is_admin and not self.settings.check_ip(self.request.remote_addr):
       return self.response.out.write('Your IP address has been banned')
 
     if not is_admin and not self.settings.check_user( user ):
@@ -395,7 +395,7 @@ class PostForm(FofouBase):
     if not forum or (forum.is_disabled and not is_admin):
       return self.redirect("/")
     
-    if not is_admin and not self.settings.check_ip(os.environ['REMOTE_ADDR']):
+    if not is_admin and not self.settings.check_ip(self.request.remote_addr):
       return self.response.out.write('Your IP address has been banned')
 
     if not is_admin and not self.settings.check_user( user ):
@@ -437,7 +437,7 @@ class PostForm(FofouBase):
     if not forum or (forum.is_disabled and not is_admin):
       return self.redirect("/")
 
-    if not is_admin and not self.settings.check_ip(os.environ['REMOTE_ADDR']):
+    if not is_admin and not self.settings.check_ip(self.request.remote_addr):
       return self.response.out.write('Your IP address has been banned')
 
     if not is_admin and not self.settings.check_user( user ):
@@ -526,7 +526,7 @@ class PostForm(FofouBase):
     post = Post(
       topic = topic, 
       user = fuser, 
-      user_ip = os.environ['REMOTE_ADDR'], 
+      user_ip = self.request.remote_addr, 
       message = message, 
       sha1_digest = sha1_digest, 
       user_name = fuser.name,
