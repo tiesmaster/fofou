@@ -511,6 +511,10 @@ class PostForm(FofouBase):
       errors['valid'] = False
       errors['message'] = "This is a duplicate post"
 
+    if homepage and not homepage.startswith('http://'):
+      errors['valid'] = False
+      errors['homepage'] = 'Invalid URL for Home Page. Must start with http://'
+
     if not errors['valid']:
       return self.template_out("skins/default/post.html", {
         'isadmin': is_admin,

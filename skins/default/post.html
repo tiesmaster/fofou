@@ -40,7 +40,7 @@
     </div>
     
     <div class="field">
-      <label for="Url">Home Page</label>
+      <label for="Url">Home Page <span class="error">{{errors.homepage}}</span></label>
 		  <input class="Url text" size="60" maxlength="128" name="homepage" id="Url" value="{{ fuser.homepage|default:"http://"|escape }}" type="edit">
 	  </div>
 		

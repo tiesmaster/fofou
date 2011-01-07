@@ -11,7 +11,7 @@
 			<div class="meta">
 				<strong class="name" {% if isadmin %}title="{{ post.get_ip }}" style="cursor:pointer"{% endif %}>
 				  {% if post.user_homepage %}
-				    <a href="{{ post.user_homepage }}">{{ post.user_name|escape }}</a>
+				    <a href="{{ post.user_homepage|escape }}">{{ post.user_name|escape }}</a>
 				  {% else %}
 				    {{ post.user_name|escape }}
 				  {% endif %}
