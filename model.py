@@ -1,15 +1,12 @@
 import logging
 from google.appengine.ext import db
 
-class Callable:
-  def __init__(self, func):
-    self.__call__ = func
-
 class FofouSettings(db.Model):
   banned_ips = db.TextProperty()
   email_whitelist = db.TextProperty()
   email_blacklist = db.TextProperty()
   
+  @staticmethod
   def load():
     settings = FofouSettings.all()
     try:
@@ -20,8 +17,6 @@ class FofouSettings(db.Model):
       
     return settings
 
-  load = Callable(load)
-  
   def check_ip(self, ip):
     return ip not in ( x.strip() for x in self.banned_ips.replace("\r", "").split("\n"))
   
@@ -73,7 +68,9 @@ class Forum(db.Model):
   num_topics = db.IntegerProperty(required=False, default=0)
   
   # A class method for getting Forum instances based on forum urls
-  from_url = Callable(lambda url: Forum.gql("WHERE url = :1", (url[1:] if url.startswith("/") else url).split("/")[0]).get())
+  @staticmethod
+  def from_url(url):
+    return Forum.gql("WHERE url = :1", (url[1:] if url.startswith("/") else url).split("/")[0]).get()
 
   def enable_txt(self):
     return "enable" if self.is_disabled else "disable"
@@ -103,6 +100,7 @@ class Topic(db.Model):
   # ncomments is redundant but is faster than always quering count of Posts
   ncomments = db.IntegerProperty(default=0)
   
+  @staticmethod
   def getlist(forum, is_admin=False, offset="", max_topics=75):
     q = Topic.all().filter("forum =", forum)
     
@@ -113,13 +111,9 @@ class Topic(db.Model):
     new_offset = 0 if len(topics) < max_topics else q.cursor()
     return new_offset, topics
   
-  getlist = Callable(getlist)
-  
-  def get_id(self):
+  @property
+  def id(self):
     return self.key().id()
-
-  id = property(get_id)
-
 
 def ip2long(ip):
   return reduce(lambda x, y: x + y, (int(segment) * (256**(3-power)) for power, segment in enumerate(ip.split('.'))))
@@ -149,18 +143,18 @@ class Post(db.Model):
   user_email = db.StringProperty()
   user_homepage = db.StringProperty()
     
-  def get_ip(self):
-    return ".".join(( str(int(self.user_ip >> (24 - (x * 8)) & 0xFF)) for x in range(0,4) ))
+  @property
+  def ip():
+    def fget(self):
+      return ".".join(( str(int(self.user_ip >> (24 - (x * 8)) & 0xFF)) for x in range(0,4) ))
 
-  def set_ip(self, ip):
-    self.user_ip = ip2long(ip)
+    def fset(self, ip):
+      self.user_ip = ip2long(ip)
 
-  def get_id(self):
+  @property
+  def id(self):
     return self.key().id()
 
-  ip = property( get_ip, set_ip )
-  id = property( get_id )
-  
   def get_excerpt(self):
     """ Returns the first 50 words of a post. Appends ... if this post has more than 50 words """
     words = self.message.split(" ")
