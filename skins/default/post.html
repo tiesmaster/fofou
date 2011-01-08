@@ -2,8 +2,8 @@
 {% block content %}
 <div id="posts">
   <form action="" method="post">
-	  {% if topic %}<input name="topic_id" value="{{ topic.id }}" type="hidden">
-		  <h2>Reply to "{{ topic.subject|escape }}"</h2>
+	  {% if topic %}<input name="topic_id" value="{{ topic.id }}" type="hidden" />
+		  <h2>Reply to "{{ topic.subject|escape|capfirst }}"</h2>
 	    {% else %}
 		  <h2>New topic</h2>
 	  {% endif %}
@@ -11,7 +11,7 @@
 	  {% if not topic %} 
 		<div class="field">
 			<label for="Subject">Subject <span class="error">{{errors.subject}}</span></label>
-			<input class="text" size="60" maxlength="64" name="subject" id="Subject" value="{{ topic.subject|default:post.subject|escape }}" type="edit">
+			<input class="text" size="60" maxlength="64" name="subject" id="Subject" value="{{ topic.subject|default:post.subject|escape }}" type="text" />
 		</div>
 		{% endif %}
 
@@ -20,14 +20,14 @@
 			  <small style="font-style:italic; font-weight:normal">Don't use HTML; surround links with spaces</small>
 			  <span class="error">{{errors.message}}</span>
 			</label>
-			<textarea name="message" id="Message" rows="16" cols="60" wrap="virtual">{{ post.message|escape }}</textarea>
+			<textarea name="message" id="Message" rows="16" cols="60">{{ post.message|escape }}</textarea>
 		</div>
 		
 		<div class="field">
 			<label class="{{ name_class }}" for="Name">Full name
 			  <small style="font-style:italic; font-weight:normal">Leave empty to go as "Anonymous"</small>
 			</label>
-			<input class="text" size="60" maxlength="32" name="name" id="Name" value="{{ fuser.name|escape }}" type="edit">
+			<input class="text" size="60" maxlength="32" name="name" id="Name" value="{{ fuser.name|escape }}" type="text" />
 		</div>
 		
 		<div class="field">
@@ -36,16 +36,16 @@
 				  Allows other people to email you through this web site. Your address is never revealed.
 				</small>
 		  </label>
-			<input class="text" size="60" maxlength="64" name="email" id="Email" value="{{ fuser.email|escape }}" type="edit">
+			<input class="text" size="60" maxlength="64" name="email" id="Email" value="{{ fuser.email|escape }}" type="text" />
     </div>
     
     <div class="field">
       <label for="Url">Home Page <span class="error">{{errors.homepage}}</span></label>
-		  <input class="Url text" size="60" maxlength="128" name="homepage" id="Url" value="{{ fuser.homepage|default:"http://"|escape }}" type="edit">
+		  <input class="Url text" size="60" maxlength="128" name="homepage" id="Url" value="{{ fuser.homepage|default:"http://"|escape }}" type="text" />
 	  </div>
 		
 		<div class="field">
-		  <label for="Remember"><input name="remember" id="remember" value="1"{% if fuser.remember_me %} checked{% endif %} type="checkbox"> Remember me</label>
+		  <label for="Remember"><input name="remember" id="Remember" value="1"{% if fuser.remember_me %} checked="checked"{% endif %} type="checkbox" /> Remember me</label>
 		</div>	
   
     <div id="buttons" style="text-align:right">

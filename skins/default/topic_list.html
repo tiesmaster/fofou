@@ -36,7 +36,7 @@
       	  <div class="body">
             <h3>
               <a title="{{ topic.msg_short }}" href="{{ forum.root }}topic?id={{ topic.id }}{% if topic.ncomments %}&amp;comments={{ topic.ncomments }}{% endif %}">
-      		      {{ topic.subject|escape }}
+							{{ topic.subject|escape }}
       		    </a>
       		  </h3>
       		  <p>{{ topic.excerpt|escape }}</p>

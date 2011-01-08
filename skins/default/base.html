@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 	<title>{% block title %}{{ forum.title|default:forum.url }}{% endblock %}</title>
-	<link href="/static/default.css" rel="stylesheet" type="text/css" >
+	<link href="/static/default.css" rel="stylesheet" type="text/css" />
 	{% block extrahead %}{% endblock %}
 </head>
 <body>
@@ -23,10 +23,10 @@
   <p id="tagline">{% block tagline %}<a href="{{forum.root}}">{{ forum.title|default:forum.url }}</a>{% endblock %}</p>
   
   <form method="get" action="http://google.com/search">
-		<input type="hidden" name="IncludeBlogs" value="1"><input type="hidden" name="as_sitesearch" value="{{ siteurl }}">
+		<input type="hidden" name="IncludeBlogs" value="1" /><input type="hidden" name="as_sitesearch" value="{{ siteurl }}" />
 		<div id="forum-search" style="display:none">
-		  <input name="q" id="search" value="search" type="text">
-		  <input class="button" value="Go" type="submit">
+		  <input name="q" id="search" value="search" type="text" />
+		  <input class="button" value="Go" type="submit" />
 		</div>
 	</form>
 	
@@ -34,7 +34,7 @@
     <div id="sidebar">
       <div style="text-align:center; margin: 0">
         <a style="text-decoration:none" href="/">
-          <img alt="Lucca Leadership" style="width:50px; border:none" title="Lucca Leadership" src="/static/logo.jpg"><br>
+          <img alt="Lucca Leadership" style="width:50px; border:none" title="Lucca Leadership" src="/static/logo.jpg" /><br />
         </a>
       </div>
       <div id="navigation">
