@@ -32,19 +32,6 @@ BANNED_IPS = { }
 
 RE_VALID_URL = re.compile(r'^[a-z0-9]+([_\-]?[a-z0-9]+)*$')
 
-def to_unicode(val):
-  if isinstance(val, unicode): 
-    return val
-  try: return unicode(val, 'latin-1')
-  except: pass
-  try: return unicode(val, 'ascii')
-  except: pass
-  try: return unicode(val, 'utf-8')
-  except: raise
-
-def to_utf8(s):
-  return to_unicode(s).encode("utf-8")
-
 class FofouBase(webapp.RequestHandler):
   """ A base class for all request handlers. Abstracts cookies and response writes. """
   
@@ -161,7 +148,7 @@ class ManageForums(FofouBase):
           forum.is_disabled = False
           msg = "Forum %s has been enbled" % (forum.title or forum.url)
         forum.put()
-        return self.redirect("/manageforums?msg=%s" % urllib.quote( to_utf8( msg ) ) )
+        return self.redirect("/manageforums?msg=%s" % urllib.quote_plus( msg.encode('UTF-8') ) )
     
     self.tvals['forum'] = forum
     return self.template_out(self.tpl, self.tvals)
@@ -205,7 +192,7 @@ class ManageForums(FofouBase):
       )
     
     forum.put()
-    return self.redirect("/manageforums?msg=%s" % urllib.quote( to_utf8( "Forum has been successfully edited/added" ) ) )
+    return self.redirect("/manageforums?msg=%s" % urllib.quote_plus( "Forum has been successfully edited/added" ) )
 
 # Responds to GET /postdel?<post_id> and /postundel?<post_id>
 class PostDelUndel(webapp.RequestHandler):
@@ -476,7 +463,7 @@ class PostForm(FofouBase):
     name = self.request.get('name').strip()
     email = self.request.get('email').strip()
     subject = self.request.get('subject').strip()
-    message = to_unicode( self.request.get('message') ).strip()
+    message = self.request.get('message').strip()
     homepage = self.request.get('homepage').strip()
     homepage = "" if homepage == "http://" else homepage
     remember = bool(self.request.get('remember'))
