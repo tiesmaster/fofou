@@ -34,21 +34,14 @@ RE_VALID_URL = re.compile(r'^[a-z0-9]+([_\-]?[a-z0-9]+)*$')
 
 class FofouBase(webapp.RequestHandler):
   """ A base class for all request handlers. Abstracts cookies and response writes. """
-  
+
   def __init__(self, *args, **kwargs):
     super(FofouBase, self).__init__(*args, **kwargs)
     self.settings = FofouSettings.load()
-  
-  def template_out(self, template_path, template_values):
-    # just a dummy call to to the function
-    self.get_cooke()
-    self.response.headers['Content-Type'] = 'text/html'
-    self.response.out.write( template.render(template_path, template_values) )
+    self._cookie = None
 
-  _cookie = None
-  def get_cooke(self):
-    if self._cookie:
-      return self._cookie
+  def initialize(self, *args, **kwargs):
+    super(FofouBase, self).initialize(*args, **kwargs)
 
     try:
       fid = self.request.cookies[FOFOU_COOKIE]
@@ -56,11 +49,15 @@ class FofouBase(webapp.RequestHandler):
       fid = sha.new(repr(time.time())).hexdigest()
       expires = datetime.datetime.now() + datetime.timedelta(COOKIE_EXPIRE_TIME)
       self.response.headers['Set-Cookie'] = '%s=%s; expires=%s; path=/' % (FOFOU_COOKIE, fid, expires.strftime(HTTP_DATE_FMT))
-
     self._cookie = fid
-    return self._cookie
-  
-  cookie = property(get_cooke)
+
+  @property
+  def cookie(self):
+      return self._cookie
+
+  def template_out(self, template_path, template_values):
+    self.response.headers['Content-Type'] = 'text/html'
+    self.response.out.write( template.render(template_path, template_values) )
 
 class ManageSettings(FofouBase):
   
